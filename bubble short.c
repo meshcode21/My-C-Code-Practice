@@ -27,5 +27,6 @@ int main(){
 	printf("\nThe numbers in ascending order are:\n");
 	for(i=0;i<n;i++)
 		printf(" %d",a[i]);
-	
+		
+	return 0;
 }
