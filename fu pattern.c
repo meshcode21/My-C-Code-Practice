@@ -11,6 +11,6 @@ void bhuwan(int n,char ch){
 
 int main(){
 	int i;
-	bhuwan(5,'#');
+	bhuwan(5,'@');
 }
 
