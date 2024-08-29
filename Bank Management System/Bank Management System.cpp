@@ -45,7 +45,12 @@ public:
 			goto againGender;
 		}
 		cout<<"\tAddress: "; cin>>address;
+	again:
 		cout<<"\n\tEnter Opening Balance: Rs."; cin>>balance;
+		if(balance<0){
+			cerr<<"\n\t\t!!!! Negative Balance Error !!!!"<<endl;
+			goto again;
+		}
 	}
 	
 	void getData(){
@@ -167,10 +172,15 @@ int Amount(char stream[],char mode){
 			} 
 			else if(mode == 'a'){
 				cout<<"\n\t\tEnter Amount to Add: ";  cin>>balance;
-				
-				acc.setBalance(acc.getBalance()+balance);
-				cout<<"\n\t\tBalance Added Successful..."<<endl;
-				cout<<"\t\tNew Balance is: "<<acc.getBalance()<<endl;
+			
+				if(balance >= 0){
+					acc.setBalance(acc.getBalance()+balance);
+					cout<<"\n\t\tBalance Added Successful..."<<endl;
+					cout<<"\t\tNew Balance is: "<<acc.getBalance()<<endl;
+				}else{
+					cerr<<"\n\t\t!!!! Negative Balance Error !!!!"<<endl;
+					goto again;
+				}
 			}		
 		}		
 		if(!tempfile.write((char*)&acc,sizeof(acc))) cerr<<"\t\tError while writing in temp file.."<<endl;
@@ -204,6 +214,7 @@ void displayAccounts(char stream[]){
 	
 	cout<<setfill('-');
 	cout<<setw(10)<<"+"<<setw(20)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
+	
 	file.close();
 	getch();
 }
@@ -217,7 +228,7 @@ void End(){
 int main(){
 	char filestream[] = "accounts.txt";
 	
-	fstream file(filestream);
+	ofstream file(filestream);
 	if(!file.is_open()){
 		cout<<"something is wrong in file opening...!!";
 		exit(1);
