@@ -1,14 +1,14 @@
 #include <iostream>
+#include <cstdio> // For remove()
 
 int main() {
-    char fullName[100]; // Declare a character array to store the input
+    const char* filename = "Employee.txt";
 
-    std::cout << "Enter your full name: ";
-    
-    // Use std::cin.getline() to read input with spaces into the character array
-    std::cin.getline(fullName, 100);
-
-    std::cout << "Your full name is: " << fullName << std::endl;
+    if (remove(filename) != 0) {
+        std::perror("Error deleting file");
+    } else {
+        std::cout << "File successfully deleted\n";
+    }
 
     return 0;
 }

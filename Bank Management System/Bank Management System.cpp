@@ -2,6 +2,7 @@
 #include<conio.h>
 #include<fstream>
 #include<iomanip>
+#include<cstdio>
 using namespace std;
 
 
@@ -15,6 +16,12 @@ class BankAccount{
 	char address[50];
 	
 public:
+	void setBalance(double b){
+		balance = b;
+	}
+	double getBalance(){
+		return balance;
+	}
 	void setData(int accNo){
 		accountNumber = accNo;
 		cout<<"\tNew account number is: "<<accNo<<endl<<endl; 
@@ -65,7 +72,8 @@ public:
 void header(){
 	system("cls");
 	cout<<"#"<<setw(86)<<setfill('#')<<"#"<<endl;
-	cout<<"#"<<setw(86)<<setfill(' ')<<"#"<<endl;
+	cout<<setfill(' ');
+	cout<<"#"<<setw(86)<<"#"<<endl;
 	cout<<"#"<<setw(85)<<left<<"                       Welcome to Bank Management System"<<"#"<<endl;
 	cout<<"#"<<setw(86)<<setfill(' ')<<right<<"#"<<endl;
 	cout<<"#"<<setw(86)<<setfill('#')<<"#"<<endl<<endl<<endl;
@@ -82,6 +90,16 @@ char dashboard(){
 	cout<<"\n\t\tEnter your choice:"; cin>>choice;
 	cin.ignore();
 	return choice;
+}
+
+void displayRecordHead(){
+	cout<<left<<setfill('-');
+	cout<<setw(10)<<"+"<<setw(20)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
+	cout<<setfill(' ');
+	cout<<setw(10)<<"| AccNo."<<setw(20)<<"| AccHolder Name"<<setw(6)<<"| Age"<<setw(10)<<"| Gender"<<setw(15)<<"| Address"<<setw(10)<<"| AccType"<<setw(15)<<"| Balance"<<"|"<<endl;
+	cout<<setfill('-');
+	cout<<setw(10)<<"+"<<setw(20)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
+	cout<<setfill(' ');
 }
 
 int createAccount(char file[]){
@@ -110,18 +128,68 @@ int createAccount(char file[]){
 	getch();
 }
 
+int Amount(char stream[],char mode){
+	ifstream file(stream);
+	ofstream tempfile("temp.txt",ios::app);
+	BankAccount acc;
+	int accNo;
+	double balance;
+	bool isfound = false;
+	
+	if(!file.is_open() && !tempfile.is_open()){
+		cerr<<"Error while opening file..";
+		return 1;
+	}
+
+	header();
+	cout<<"\t\tEnter Acc. Number: "; cin>>accNo;
+
+	file.seekg(0,ios::beg);
+	while(file.read((char*)&acc,sizeof(acc))){
+		if(acc.getAccNo() == accNo){
+			isfound = true;
+			displayRecordHead();
+			acc.getData();
+			cout<<setfill('-');
+			cout<<setw(10)<<"+"<<setw(20)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
+		again:
+			if(mode == 'w'){
+				cout<<"\n\t\tEnter Amount to widthdraw: "; 	cin>>balance;	
+				
+				if(balance<=acc.getBalance()){
+					acc.setBalance(acc.getBalance()-balance);
+					cout<<"\n\t\tBalance Widthdraw Successful..."<<endl;
+					cout<<"\t\tNew Balance is: "<<acc.getBalance()<<endl;
+				}else{
+					cerr<<"\n\t\t!!!! Insufficient balance  !!!!"<<endl;
+					goto again;
+				}
+			} 
+			else if(mode == 'a'){
+				cout<<"\n\t\tEnter Amount to Add: ";  cin>>balance;
+				
+				acc.setBalance(acc.getBalance()+balance);
+				cout<<"\n\t\tBalance Added Successful..."<<endl;
+				cout<<"\t\tNew Balance is: "<<acc.getBalance()<<endl;
+			}		
+		}		
+		if(!tempfile.write((char*)&acc,sizeof(acc))) cerr<<"\t\tError while writing in temp file.."<<endl;
+	}
+	if(!isfound) cerr<<"\n\t\tAccount not found..."<<endl;	
+	file.close();
+	tempfile.close();
+	
+	remove(stream);
+	rename("temp.txt",stream);
+	getch();
+}
+
 void displayAccounts(char stream[]){
 	ifstream file(stream);
 	header();
 	BankAccount acc;
 	
-	cout<<left<<setfill('-');
-	cout<<setw(10)<<"+"<<setw(20)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
-	cout<<setfill(' ');
-	cout<<setw(10)<<"| AccNo."<<setw(20)<<"| AccHolder Name"<<setw(6)<<"| Age"<<setw(10)<<"| Gender"<<setw(15)<<"| Address"<<setw(10)<<"| AccType"<<setw(15)<<"| Balance"<<"|"<<endl;
-	cout<<setfill('-');
-	cout<<setw(10)<<"+"<<setw(20)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
-	cout<<setfill(' ');
+	displayRecordHead();
 	
 	file.seekg(0,ios::end);
 	if(file.tellg()){
@@ -164,10 +232,10 @@ int main(){
 				createAccount(filestream);
 			break;
 			case '2':
-	//			withdrawAmount();
+				Amount(filestream,'w');
 			break;
 			case '3': 
-	//			addAmount();
+				Amount(filestream,'a');
 			break;
 			case '4': 
 				displayAccounts(filestream);
