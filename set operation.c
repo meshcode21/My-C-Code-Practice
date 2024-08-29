@@ -7,9 +7,10 @@ void display(int arr[],int size){
 	printf("\n");
 }
 
-void Union(int a[],int b[],int u[],int m,int n){
+void Union(int a[],int b[],int m,int n){
 	int i,j,k;
 	int common[50],c_len=0,count=0;
+	int u[50];
 	
 	for(i=0;i<m;i++) 
 		u[count++] = a[i];
@@ -21,12 +22,13 @@ void Union(int a[],int b[],int u[],int m,int n){
 		if(j==count) u[count++] = b[i];
 	}
 	
-	printf("\nThe result of the A union B is:\n");
+	printf("\n A U B : ");
 	display(u,count);
 }
 
-void Intersection(int a[],int b[],int intr[],int m,int n){
+void Intersection(int a[],int b[],int m,int n){
 	int i,j,count=0;
+	int intr[50];
 	
 	for(i=0;i<m;i++){
 		for(j=0;j<n;j++){
@@ -37,12 +39,32 @@ void Intersection(int a[],int b[],int intr[],int m,int n){
 		}
 	}
 	
-	printf("\nThe result of A intersection B is:\n");
+	printf("\n A n B : ");
 	display(intr,count);
 }
 
+void Difference(int a[], int b[],int m, int n){
+	int result[50],count = 0;
+	int isEqual = 0;
+	int i,j;
+	
+	for(i=0;i<m;i++){
+		for(j=0;j<n;j++){
+			if(a[i] != b[j]){
+				isEqual = 0;
+			}else{
+				isEqual = 1;
+				break;
+			} 
+		}
+		if(!isEqual) result[count++] = a[i];
+	}
+	printf("\n A - B : ");
+	display(result,count);
+}
+
 int main(){
-	int a[50],b[50],u[50];
+	int a[50],b[50];
 	int m,n,i,j;
 	
 	printf("Enter the size of A and B:"); scanf("%d%d",&m,&n);
@@ -55,7 +77,9 @@ int main(){
 	for(i=0;i<n;i++)
 		scanf("%d",&b[i]);
 		
-	Intersection(a,b,u,m,n);
+	Intersection(a,b,m,n);
+	Union(a,b,m,n);
+	Difference(a,b,m,n);
 	
 	return 0;
 }
