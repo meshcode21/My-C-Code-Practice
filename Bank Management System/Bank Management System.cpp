@@ -1,6 +1,7 @@
 #include<iostream>
 #include<conio.h>
 #include<fstream>
+#include<iomanip>
 using namespace std;
 
 
@@ -27,7 +28,8 @@ public:
 		}
 		
 		cout<<"\n\tEnter Basic details of new Account Holder"<<endl;
-		cout<<"\tName: "; cin>>name;
+		cin.ignore();
+		cout<<"\tName: "; cin.getline(name,50);
 		cout<<"\tAge: "; cin>>age;
 	againGender:
 		cout<<"\tGender[m/f/o]:"; cin>>gender;
@@ -52,8 +54,8 @@ public:
 		else if (gender == 'o') gen = "Other";
 		else gen = "-----";
 		
-		cout<<"\t"<<accountNumber<<"\t"<<name<<"\t\t"<<age<<"\t\t"<<gen<<"\t\t"<<address<<"\t\t"<<accType<<"\t\t"<<balance<<endl;
-//		cout<<"\t"<<accountNumber<<" \t"<<age<<" \t"<<gender<<" \t"<<accountType<<" \t"<<balance<<endl;
+		cout<<left;
+		cout<<"| "<<setw(8)<<accountNumber<<"| "<<setw(18)<<name<<"| "<<setw(4)<<age<<"| "<<setw(8)<<gen<<"| "<<setw(13)<<address<<"| "<<setw(8)<<accType<<"| "<<setw(13)<<balance<<"|"<<endl;
 	}
 	int getAccNo(){
 		return accountNumber;
@@ -62,71 +64,92 @@ public:
 
 void header(){
 	system("cls");
-	cout<<"###############################################"<<endl;
-	cout<<"#                                             #"<<endl;
-	cout<<"#     Welcome to Bank Management System       #"<<endl;
-	cout<<"#                                             #"<<endl;
-	cout<<"###############################################"<<endl<<endl;
+	cout<<"#"<<setw(86)<<setfill('#')<<"#"<<endl;
+	cout<<"#"<<setw(86)<<setfill(' ')<<"#"<<endl;
+	cout<<"#"<<setw(85)<<left<<"                       Welcome to Bank Management System"<<"#"<<endl;
+	cout<<"#"<<setw(86)<<setfill(' ')<<right<<"#"<<endl;
+	cout<<"#"<<setw(86)<<setfill('#')<<"#"<<endl<<endl<<endl;
 }
 char dashboard(){
 	char choice;	
 	
 	header();
-	cout<<"\t1. Create New Account"<<endl;
-	cout<<"\t2. Withdraw Amount"<<endl;
-	cout<<"\t3. Add Amount"<<endl;
-	cout<<"\t4. Display Records"<<endl;
-	cout<<"\t5. Exit"<<endl;	
-	cout<<"\t\nEnter your choice:"; cin>>choice;
+	cout<<"\t\t1. Create New Account"<<endl;
+	cout<<"\t\t2. Withdraw Amount"<<endl;
+	cout<<"\t\t3. Add Amount"<<endl;
+	cout<<"\t\t4. Display Records"<<endl;
+	cout<<"\t\t5. Exit"<<endl;	
+	cout<<"\n\t\tEnter your choice:"; cin>>choice;
+	cin.ignore();
 	return choice;
 }
 
-void createAccount(char file[]){
-	ofstream f(file,ios::app);
+int createAccount(char file[]){
+	fstream f(file,ios::in | ios::app);
 	header();
 	BankAccount acc;
 	int accNo;
 	
-	fstream f1(file);
-	if(!f1.seekg(-sizeof(acc),ios::end)) accNo = 100;
+	if(!f.is_open()){
+		cerr<<"Error while opening file..";
+		return 1;
+	}
+	
+	if(!f.seekg(-sizeof(acc),ios::end)) accNo = 100;
 	else{
-		f1.read((char*)&acc,sizeof(acc));
+		f.read((char*)&acc,sizeof(acc));
 		accNo = 1 + acc.getAccNo();
 	}
-	f1.clear();
+	f.clear();
 	
-//	f.seekg(0,ios::end);
+	f.seekp(0,ios::end);
 	acc.setData(accNo);
 	if(f.write((char*)&acc,sizeof(acc)) == 0) cout<<"\n\tError while writing data..."<<endl;
 	else cout<<"\n\tNew Account created successfully..."<<endl;
+	f.close();
 	getch();
 }
 
-void displayAccounts(char file[]){
-	ifstream f(file);
+void displayAccounts(char stream[]){
+	ifstream file(stream);
 	header();
 	BankAccount acc;
 	
-	cout<<"\tAccNo.\tAccount Holder Name\t\tAge\t\tGender\t\tAddress\t\tAccount type\t\tCurrent Balance"<<endl;
+	cout<<left<<setfill('-');
+	cout<<setw(10)<<"+"<<setw(20)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
+	cout<<setfill(' ');
+	cout<<setw(10)<<"| AccNo."<<setw(20)<<"| AccHolder Name"<<setw(6)<<"| Age"<<setw(10)<<"| Gender"<<setw(15)<<"| Address"<<setw(10)<<"| AccType"<<setw(15)<<"| Balance"<<"|"<<endl;
+	cout<<setfill('-');
+	cout<<setw(10)<<"+"<<setw(20)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
+	cout<<setfill(' ');
 	
-//	f.open(file);
-	f.seekg(0,ios::beg);
-	f.read((char*)&acc,sizeof(acc));
-		acc.getData();
+	file.seekg(0,ios::end);
+	if(file.tellg()){
+		file.seekg(0,ios::beg);
+		while(file.read((char*)&acc,sizeof(acc))){
+			acc.getData();	
+		}
+	}
+	else{
+		cerr<<"\t---------- No Record found ---------"<<endl;
+	}
 	
-	f.close();
+	cout<<setfill('-');
+	cout<<setw(10)<<"+"<<setw(20)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
+	file.close();
 	getch();
 }
 
 void End(){
 	header();
-	cout<<"\tThankyou For your Time. !!!!!"<<endl;
+	cout<<"\t\t\t!!!!  Thankyou For your Time.  !!!!!"<<endl;
+	getch();
 }
 
 int main(){
 	char filestream[] = "accounts.txt";
 	
-	fstream file(filestream, ios::out);
+	fstream file(filestream);
 	if(!file.is_open()){
 		cout<<"something is wrong in file opening...!!";
 		exit(1);
@@ -153,11 +176,9 @@ int main(){
 				End();
 			break;
 			default:
-				cout<<"Invalid choice !!!!"; getch();
+				cout<<"\n\t\t!!! Invalid choice !!!!"; getch();
 		}
 	}while(choice != '5');
-	
-	file.close();
 	
 	return 0;	
 }
