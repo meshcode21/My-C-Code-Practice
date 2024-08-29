@@ -67,26 +67,33 @@ public:
 		else gen = "-----";
 		
 		cout<<left;
-		cout<<"| "<<setw(8)<<accountNumber<<"| "<<setw(18)<<name<<"| "<<setw(4)<<age<<"| "<<setw(8)<<gen<<"| "<<setw(13)<<address<<"| "<<setw(8)<<accType<<"| "<<setw(13)<<balance<<"|"<<endl;
+		cout<<" | "<<setw(8)<<accountNumber<<"| "<<setw(23)<<name<<"| "<<setw(4)<<age<<"| "<<setw(8)<<gen<<"| "<<setw(13)<<address<<"| "<<setw(8)<<accType<<"| "<<setw(13)<<balance<<"|"<<endl;
 	}
 	int getAccNo(){
 		return accountNumber;
 	}
 };
 
-void header(){
+void header(int section){
 	system("cls");
-	cout<<"#"<<setw(86)<<setfill('#')<<"#"<<endl;
-	cout<<setfill(' ');
-	cout<<"#"<<setw(86)<<"#"<<endl;
-	cout<<"#"<<setw(85)<<left<<"                       Welcome to Bank Management System"<<"#"<<endl;
-	cout<<"#"<<setw(86)<<setfill(' ')<<right<<"#"<<endl;
-	cout<<"#"<<setw(86)<<setfill('#')<<"#"<<endl<<endl<<endl;
+	cout<<"   #"<<setw(86)<<setfill('#')<<"#"<<endl;
+	cout<<"   #"<<setw(86)<<setfill(' ')<<right<<"#"<<endl;
+	cout<<"   #"<<setw(85)<<left<<"                       Welcome to Bank Management System"<<"#"<<endl;
+	cout<<"   #"<<setw(86)<<setfill(' ')<<right<<"#"<<endl;
+	cout<<"   #"<<setw(86)<<setfill('#')<<"#"<<endl<<endl;
+	
+	switch(section){
+		case 0: cout<<"\t\tDashboard...\n"<<endl; break;
+		case 1: cout<<"\t\tNew Account Create Section...\n"<<endl; break;
+		case 2: cout<<"\t\tAmount Widthdraw Section...\n"<<endl; break;
+		case 3: cout<<"\t\tAmount Add Section...\n"<<endl; break;
+		case 4: cout<<"\t\tRecord Section...\n"<<endl; break;
+	}
 }
 char dashboard(){
 	char choice;	
 	
-	header();
+	header(0);
 	cout<<"\t\t1. Create New Account"<<endl;
 	cout<<"\t\t2. Withdraw Amount"<<endl;
 	cout<<"\t\t3. Add Amount"<<endl;
@@ -99,17 +106,21 @@ char dashboard(){
 
 void displayRecordHead(){
 	cout<<left<<setfill('-');
-	cout<<setw(10)<<"+"<<setw(20)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
+	cout<<" "<<setw(10)<<"+"<<setw(25)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
 	cout<<setfill(' ');
-	cout<<setw(10)<<"| AccNo."<<setw(20)<<"| AccHolder Name"<<setw(6)<<"| Age"<<setw(10)<<"| Gender"<<setw(15)<<"| Address"<<setw(10)<<"| AccType"<<setw(15)<<"| Balance"<<"|"<<endl;
+	cout<<" "<<setw(10)<<"| AccNo."<<setw(25)<<"| AccHolder Name"<<setw(6)<<"| Age"<<setw(10)<<"| Gender"<<setw(15)<<"| Address"<<setw(10)<<"| AccType"<<setw(15)<<"| Balance"<<"|"<<endl;
 	cout<<setfill('-');
-	cout<<setw(10)<<"+"<<setw(20)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
+	cout<<" "<<setw(10)<<"+"<<setw(25)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
 	cout<<setfill(' ');
+}
+void displayRecordEnd(){
+	cout<<setfill('-');
+	cout<<" "<<setw(10)<<"+"<<setw(25)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
 }
 
 int createAccount(char file[]){
 	fstream f(file,ios::in | ios::app);
-	header();
+	header(1);
 	BankAccount acc;
 	int accNo;
 	
@@ -146,7 +157,9 @@ int Amount(char stream[],char mode){
 		return 1;
 	}
 
-	header();
+	if(mode == 'w') header(2);
+	else header(3);
+	
 	cout<<"\t\tEnter Acc. Number: "; cin>>accNo;
 
 	file.seekg(0,ios::beg);
@@ -155,8 +168,7 @@ int Amount(char stream[],char mode){
 			isfound = true;
 			displayRecordHead();
 			acc.getData();
-			cout<<setfill('-');
-			cout<<setw(10)<<"+"<<setw(20)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
+			displayRecordEnd();
 		again:
 			if(mode == 'w'){
 				cout<<"\n\t\tEnter Amount to widthdraw: "; 	cin>>balance;	
@@ -196,9 +208,9 @@ int Amount(char stream[],char mode){
 
 void displayAccounts(char stream[]){
 	ifstream file(stream);
-	header();
 	BankAccount acc;
 	
+	header(4);
 	displayRecordHead();
 	
 	file.seekg(0,ios::end);
@@ -212,15 +224,14 @@ void displayAccounts(char stream[]){
 		cerr<<"\t---------- No Record found ---------"<<endl;
 	}
 	
-	cout<<setfill('-');
-	cout<<setw(10)<<"+"<<setw(20)<<"+"<<setw(6)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<setw(10)<<"+"<<setw(15)<<"+"<<"+"<<endl;
+	displayRecordEnd();
 	
 	file.close();
 	getch();
 }
 
 void End(){
-	header();
+	header(5);
 	cout<<"\t\t\t!!!!  Thankyou For your Time.  !!!!!"<<endl;
 	getch();
 }
@@ -228,7 +239,7 @@ void End(){
 int main(){
 	char filestream[] = "accounts.txt";
 	
-	ofstream file(filestream);
+	ifstream file(filestream);
 	if(!file.is_open()){
 		cout<<"something is wrong in file opening...!!";
 		exit(1);
