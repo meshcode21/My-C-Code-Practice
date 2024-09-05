@@ -2,7 +2,7 @@
 #include<conio.h>
 #include<fstream>
 #include<iomanip>
-#include<cstdio>
+#include <cstring>
 using namespace std;
 
 
@@ -16,6 +16,13 @@ class BankAccount{
 	char address[50];
 	
 public:
+	int getAccNo(){
+		return accountNumber;
+	}
+	bool compareName(char n[]){
+		if(strcmp(name,n) == 0) return true;
+		else return false;
+	}
 	void setBalance(double b){
 		balance = b;
 	}
@@ -69,9 +76,6 @@ public:
 		cout<<left;
 		cout<<" | "<<setw(8)<<accountNumber<<"| "<<setw(23)<<name<<"| "<<setw(4)<<age<<"| "<<setw(8)<<gen<<"| "<<setw(13)<<address<<"| "<<setw(8)<<accType<<"| "<<setw(13)<<balance<<"|"<<endl;
 	}
-	int getAccNo(){
-		return accountNumber;
-	}
 };
 
 void header(int section){
@@ -85,20 +89,24 @@ void header(int section){
 	switch(section){
 		case 0: cout<<"\t\tDashboard...\n"<<endl; break;
 		case 1: cout<<"\t\tNew Account Create Section...\n"<<endl; break;
-		case 2: cout<<"\t\tAmount Widthdraw Section...\n"<<endl; break;
-		case 3: cout<<"\t\tAmount Add Section...\n"<<endl; break;
-		case 4: cout<<"\t\tRecord Section...\n"<<endl; break;
+		case 2: cout<<"\t\tAccount Delete Section...\n"<<endl; break;
+		case 3: cout<<"\t\tAmount Widthdraw Section...\n"<<endl; break;
+		case 4: cout<<"\t\tAmount Add Section...\n"<<endl; break;
+		case 5: cout<<"\t\tRecords Section...\n"<<endl; break;
+		case 6: cout<<"\t\tSearch Account Section...\n"<<endl; break;
 	}
 }
 char dashboard(){
 	char choice;	
 	
 	header(0);
-	cout<<"\t\t1. Create New Account"<<endl;
-	cout<<"\t\t2. Withdraw Amount"<<endl;
-	cout<<"\t\t3. Add Amount"<<endl;
-	cout<<"\t\t4. Display Records"<<endl;
-	cout<<"\t\t5. Exit"<<endl;	
+	cout<<"\t\t1. Create New Account\n"<<endl;
+	cout<<"\t\t2. Delete Account\n"<<endl;
+	cout<<"\t\t3. Withdraw Amount\n"<<endl;
+	cout<<"\t\t4. Add Amount\n"<<endl;
+	cout<<"\t\t5. Display Records\n"<<endl;
+	cout<<"\t\t6. Search Account Record\n"<<endl;	
+	cout<<"\t\t7. Exit\n"<<endl;	
 	cout<<"\n\t\tEnter your choice:"; cin>>choice;
 	cin.ignore();
 	return choice;
@@ -138,9 +146,55 @@ int createAccount(char file[]){
 	
 	f.seekp(0,ios::end);
 	acc.setData(accNo);
-	if(f.write((char*)&acc,sizeof(acc)) == 0) cout<<"\n\tError while writing data..."<<endl;
-	else cout<<"\n\tNew Account created successfully..."<<endl;
+	if(f.write((char*)&acc,sizeof(acc))) cout<<"\n\tNew Account created successfully..."<<endl;
+	else cout<<"\n\tError while writing data..."<<endl;
 	f.close();
+	getch();
+}
+
+int deleteAccount(char filename[]){
+	ifstream file(filename);
+	ofstream tempfile("temp.txt",ios::app);
+	BankAccount acc;
+	int accNo;
+	char ch;
+	bool notfound = true;
+	
+	if(!file.is_open() && !tempfile.is_open()){
+		cerr<<"Error while opening file..";
+		return 1;
+	}
+
+	header(2);
+	
+	cout<<"\t\tEnter Acc. Number: "; cin>>accNo;
+
+	file.seekg(0,ios::beg);
+	while(file.read((char*)&acc,sizeof(acc))){
+		if(acc.getAccNo() == accNo){
+			notfound = false;
+			displayRecordHead();
+			acc.getData();
+			displayRecordEnd();
+		again:
+			cout<<"\n\t\tDo you want to Delete this Account [y/n]: "; cin>>ch; cin.ignore();
+			if(ch!='y' && ch!='n'){
+				cerr<<"\n\t\t!!!! Invalid Choice  !!!!"<<endl;
+				goto again;
+			}
+			if(ch == 'y'){
+				cout<<"\n\t\tAccount Deleted successfully...."<<endl;
+				continue;
+			}		
+		}		
+		if(!tempfile.write((char*)&acc,sizeof(acc))) cerr<<"\t\tError while writing in temp file.."<<endl;
+	}
+	if(notfound) cerr<<"\n\t\tAccount not found..."<<endl;	
+	file.close();
+	tempfile.close();
+	
+	remove(filename);
+	rename("temp.txt",filename);
 	getch();
 }
 
@@ -150,22 +204,22 @@ int Amount(char stream[],char mode){
 	BankAccount acc;
 	int accNo;
 	double balance;
-	bool isfound = false;
+	bool notfound = true;
 	
 	if(!file.is_open() && !tempfile.is_open()){
 		cerr<<"Error while opening file..";
 		return 1;
 	}
 
-	if(mode == 'w') header(2);
-	else header(3);
+	if(mode == 'w') header(3);
+	else header(4);
 	
 	cout<<"\t\tEnter Acc. Number: "; cin>>accNo;
 
 	file.seekg(0,ios::beg);
 	while(file.read((char*)&acc,sizeof(acc))){
 		if(acc.getAccNo() == accNo){
-			isfound = true;
+			notfound = false;
 			displayRecordHead();
 			acc.getData();
 			displayRecordEnd();
@@ -197,7 +251,7 @@ int Amount(char stream[],char mode){
 		}		
 		if(!tempfile.write((char*)&acc,sizeof(acc))) cerr<<"\t\tError while writing in temp file.."<<endl;
 	}
-	if(!isfound) cerr<<"\n\t\tAccount not found..."<<endl;	
+	if(notfound) cerr<<"\n\t\tAccount not found..."<<endl;	
 	file.close();
 	tempfile.close();
 	
@@ -210,7 +264,7 @@ void displayAccounts(char stream[]){
 	ifstream file(stream);
 	BankAccount acc;
 	
-	header(4);
+	header(5);
 	displayRecordHead();
 	
 	file.seekg(0,ios::end);
@@ -230,16 +284,70 @@ void displayAccounts(char stream[]){
 	getch();
 }
 
+void searchAccount(char stream[]){
+	ifstream file(stream);
+	BankAccount acc;
+	char ch, name[50];
+	int accNo;
+	bool notfound = true;
+	
+	
+	header(6);
+again:
+	cout<<"\t\t1. AccNo.\n\t\t2. Name\n\n\t\tchoose: "; cin>>ch; cin.ignore();
+	if(ch!='1' && ch!='2'){
+		cout<<"\n\t\t!!! Invalid Choice !!!\n"<<endl;
+		goto again;
+	}
+	
+	if(ch=='1'){
+		cout<<"\n\t\tEnter Account Number: "; cin>>accNo;
+	}else{
+		cout<<"\n\t\tEnter Name to Search: "; cin.getline(name,50);
+	}
+	
+	displayRecordHead();
+	
+	file.seekg(0,ios::end);
+	if(file.tellg()){
+		file.seekg(0,ios::beg);
+		if(ch=='1'){
+			while(file.read((char*)&acc,sizeof(acc))){
+				if(accNo == acc.getAccNo()){
+					notfound = false;
+					acc.getData();	break;
+				}
+			}
+		}else{
+			while(file.read((char*)&acc,sizeof(acc))){
+				if(acc.compareName(name)){
+					notfound = false;
+					acc.getData();	
+				}
+			}
+		}
+	}
+	
+	if(notfound){
+		cerr<<"\t---------- No Record found ---------"<<endl;
+	}
+	
+	displayRecordEnd();
+	
+	file.close();
+	getch();
+}
+
 void End(){
-	header(5);
+	header(7);
 	cout<<"\t\t\t!!!!  Thankyou For your Time.  !!!!!"<<endl;
 	getch();
 }
 
 int main(){
-	char filestream[] = "accounts.txt";
+	char filename[] = "accounts.txt";
 	
-	ifstream file(filestream);
+	ifstream file(filename);
 	if(!file.is_open()){
 		cout<<"something is wrong in file opening...!!";
 		exit(1);
@@ -250,25 +358,17 @@ int main(){
 	do{
 		choice = dashboard();
 		switch(choice){
-			case '1':
-				createAccount(filestream);
-			break;
-			case '2':
-				Amount(filestream,'w');
-			break;
-			case '3': 
-				Amount(filestream,'a');
-			break;
-			case '4': 
-				displayAccounts(filestream);
-			break;
-			case '5': 
-				End();
-			break;
+			case '1':	createAccount(filename);	break;
+			case '2':	deleteAccount(filename);	break;
+			case '3':	Amount(filename,'w');	break;
+			case '4': 	Amount(filename,'a');	break;
+			case '5': 	displayAccounts(filename);	break;
+			case '6': 	searchAccount(filename);	break;
+			case '7': 	End();	break;
 			default:
 				cout<<"\n\t\t!!! Invalid choice !!!!"; getch();
 		}
-	}while(choice != '5');
+	}while(choice != '7');
 	
 	return 0;	
 }
