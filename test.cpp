@@ -1,31 +1,40 @@
 #include <iostream>
+#include <fstream>
 using namespace std;
 
-class Shape {	// Base class with a virtual function
-public:
-    virtual void area() {
-        cout << "Calculating area of shape..." << endl;
+void encrypt(char sourceFile[], char encryptedFile[], int shift) {
+    ifstream src(sourceFile);
+    ofstream enc(encryptedFile);
+    char c;
+    while (src.get(c)) {
+        if (isalpha(c)) {
+            char base = islower(c) ? 'a' : 'A';
+            c = (c - base + shift) % 26 + base;
+        }
+        enc << c;
     }
-};
+    src.close();
+    enc.close();
+}
 
-class Rectangle : public Shape {
-    double length, width;
-public:
-    Rectangle(double l, double w) : length(l), width(w) {}
-
-    void area() {
-        cout << "Rectangle area: " << length * width << endl;
+void decrypt (char encryptedFile[], char decryptedFile[], int shift) {
+    ifstream enc(encryptedFile);
+    ofstream dec(decryptedFile);
+    char c;
+    while (enc.get(c)) {
+        if (isalpha(c)) {
+            char base = islower(c) ? 'a' : 'A';
+            c = (c - base - shift + 26) % 26 + base;
+        }
+        dec << c;
     }
-};
+    enc.close();
+    dec.close();
+}
 
 int main() {
-    Shape* shape;  // Base class pointer
-    Rectangle rectangle(4.4, 6.5);  // Derived class object Rectangle
-
-    // Runtime polymorphism using base class pointer
-    shape = &rectangle;
-    shape->area();  // Calls Rectangle's area
-
+    encrypt("source.txt", "encrypted.txt", 3);
+    decrypt("encrypted.txt", "decrypted.txt", 3);
     return 0;
 }
 
