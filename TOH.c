@@ -7,8 +7,10 @@ void TOH(int n, char A, char B, char C){
 		TOH(n-1,B,A,C);
 	}
 }
-
 int main(){
-	TOH(3,'A','B','C');
+	int n;
+	printf("Enter no. of ring: ");
+	scanf("%d",&n);
+	TOH(n,'A','B','C');
 	return 0;
 }
