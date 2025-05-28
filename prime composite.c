@@ -13,9 +13,10 @@
 		printf("\n %d is Prime No.",n);
 	}
 	
-	void main(){
+	int main(){
 		int n;
 		printf("enter n:");
 		scanf("%d",&n);
 		prime_compoite(n);
+		return 0;
 	}
